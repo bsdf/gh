@@ -9,19 +9,64 @@ usage() if $#ARGV == -1;
 
 my $cmd = shift @ARGV;
 
-if ($cmd ~~ /^add$/) {
-    print "~cmd is add\n";
+if ( $cmd ~~ /^add$/ ) {
+    add_user(@ARGV);
 }
-elsif ($cmd ~~ /^(remove|rm)$/) {
-    print "~cmd is $1\n";
+elsif ( $cmd ~~ /^(remove|rm)$/ ) {
+    remove_user(@ARGV);
 }
-elsif ($cmd ~~ /^l(ist)?$/) {
-    print "~cmd is list\n";
+elsif ( $cmd ~~ /^l(ist)?$/ ) {
+    list_users();
 }
 else {
     usage() if $#ARGV > -1;
 
-    print "~$cmd\n";
+    switch_user($cmd);    # if theres one arg, we assume its $user
+}
+
+sub add_user {
+    my ( $user, $key ) = @_;
+
+    print "~added $user\n";
+}
+
+sub remove_user {
+    my $user = shift;
+
+    if ( r_u_sure() ) {
+
+        # remove $user
+        print "~bye\n";
+    }
+}
+
+sub list_users {
+
+    # some mock data for now.
+    my @users    = qw(asdf bsdf csdf dsdf esdf);
+    my $selected = $users[ rand(@users) ];
+
+    for (@users) {
+        if ( $_ eq $selected ) {
+            print "~$_\n";
+        }
+        else {
+            print " $_\n";
+        }
+    }
+}
+
+sub switch_user {
+    my $name = shift;
+
+    print "~$name\n";
+}
+
+sub r_u_sure {
+    print "~r u sure?: ";
+    chomp( my $input = <STDIN> );
+
+    return $input ~~ /^y(es)?$/;
 }
 
 sub usage {
