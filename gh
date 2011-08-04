@@ -4,21 +4,15 @@
 use strict;
 use autodie;
 use warnings;
-
-our %CONFIG = (
-    'current' => 'bsdf',
-    'users'   => {
-        'asdf' => 'id_rsa',
-        'bsdf' => 'id_rsa2',
-        'csdf' => 'id_rsa3',
-    },
-);
+use File::Path;
+use Data::Dumper;
 
 usage() if $#ARGV == -1;
 
-# some mock data for now.
-our @users        = sort keys $CONFIG{users};
-our $current_user = $CONFIG{current};
+our %cfg;
+our @users;
+our $current_user;
+load_config();
 
 # check first arg and match accordingly
 my $cmd = shift @ARGV;
@@ -76,6 +70,34 @@ sub r_u_sure {
     chomp( my $input = <STDIN> );
 
     return $input ~~ /^y(es)?$/;
+}
+
+sub load_config {
+    my $loc = "$ENV{HOME}/.gh/config";
+    return if not -e $loc;
+
+    open my $file, '<', $loc
+        or die ("~err: couldnt open config.");
+
+    local $/;
+    my $str = <$file>;
+    eval $str;
+
+    @users        = sort keys $cfg{users};
+    $current_user = $cfg{current};
+}
+
+sub save_config {
+    my $loc = "$ENV{HOME}/.gh";
+
+    mkpath $loc unless -d $loc;
+
+    open my $file, '>', "$loc/config"
+        or die ("~err: couldnt save config.");
+
+    $Data::Dumper::Indent = 1;
+    print $file Data::Dumper->Dump( [\%cfg], ['*cfg'] );
+    close $file;
 }
 
 sub usage {
