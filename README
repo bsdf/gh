@@ -1,0 +1,22 @@
+NAME
+    gh - manage multiple github accts
+
+USEAGE
+        > gh add bsdf ~/.ssh/id_rsa
+          added user bsdf
+
+        > gh add bsdf2 ~/.ssh/id_rsa2
+          added user bsdf2
+
+        > gh add bsdf3 ffff.txt
+          error adding user bsdf3: key does not exist.
+
+        > gh bsdf
+          switched to bsdf
+
+        > gh remove bsdf
+             or
+        > gh rm bsdf
+          r u sure? y
+          user bsdf removed
+
