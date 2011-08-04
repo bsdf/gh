@@ -4,6 +4,7 @@
 use strict;
 use autodie;
 use warnings;
+use File::Copy;
 use File::Path;
 use Data::Dumper;
 
@@ -32,6 +33,9 @@ elsif ( $cmd ~~ /^who$/ ) {
     print "~$current_user\n";
     exit;
 }
+elsif ( $cmd ~~ /^restore$/ ) {
+    restore_files();
+}
 else {
     usage() if $#ARGV > -1;
 
@@ -46,6 +50,11 @@ sub add_user {
         print "~err: $key dont exist.\n";
         exit;
     }
+
+    # backup their key
+    my $backup_dir = "$ENV{HOME}/.gh/b";
+    mkpath $backup_dir unless -d $backup_dir;
+    copy $key, "$backup_dir/$user";
 
     $cfg{users}{$user} = $key;
     $cfg{current} = $user if scalar @users == 0;
@@ -80,6 +89,14 @@ sub switch_user {
         exit;
     }
 
+    # cp selected user's key to ~/.ssh/id_rsa
+    # this might be a really bad idea but whatev
+    my $key = get_key($name);
+    copy $key, "$ENV{HOME}/.ssh/id_rsa";
+
+    # try and kill ssh-agent;
+    system qw(killall ssh-agent);
+
     $cfg{current} = $name;
     print "~$name\n";
 }
@@ -89,6 +106,13 @@ sub r_u_sure {
     chomp( my $input = <STDIN> );
 
     return $input ~~ /^y(es)?$/;
+}
+
+sub get_key {
+    my $user = shift;
+    my $backup_dir = "$ENV{HOME}/.gh/b";
+
+    return "$backup_dir/$user";
 }
 
 sub load_config {
@@ -117,6 +141,10 @@ sub save_config {
     $Data::Dumper::Indent = 1;
     print $file Data::Dumper->Dump( [ \%cfg ], ['*cfg'] );
     close $file;
+}
+
+sub restore_files {
+    my $backup_dir = "$ENV{HOME}/.gh/b";
 }
 
 sub usage {
@@ -166,5 +194,8 @@ gh - manage multiple github accts
   > gh rm bsdf2
     ~r u sure? y
     ~bye
+
+  > gh restore
+    ~keys restored
 
 =cut
