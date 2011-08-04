@@ -18,6 +18,9 @@ USEAGE
       > gh bsdf2
         ~bsdf2
 
+      > gh who
+        ~bsdf2
+
       > gh list
          bsdf
         ~bsdf2
