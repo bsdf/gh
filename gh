@@ -6,6 +6,8 @@ use autodie;
 use warnings;
 use File::Copy qw(copy);
 
+my @keys = qw(a b);
+
 sub swap_files {
     my ($a, $b) = @_;
 
@@ -20,13 +22,33 @@ sub swap_files {
     unlink "$key1.b";
 }
 
-my @keys = qw(a b);
 
-#swap_files(@keys);
+usage() if $#ARGV == -1;
 
-print @ARGV;
+my $cmd = shift @ARGV;
 
+if ($cmd ~~ /^add$/) {
+    print "~cmd is add\n";
+}
+elsif ($cmd ~~ /^(remove|rm)$/) {
+    print "~cmd is $1\n";
+}
+elsif ($cmd ~~ /^l(ist)?$/) {
+    print "~cmd is list\n";
+}
+else {
+    usage() if $#ARGV > -1;
 
+    print "~$cmd\n";
+}
+
+sub usage {
+    print STDERR <<EOF;
+~err: ur doin it rong.
+EOF
+
+    exit;
+}
 
 __END__
 
