@@ -12,6 +12,7 @@ usage() if $#ARGV == -1;
 our %cfg;
 our @users;
 our $current_user;
+
 load_config();
 
 # check first arg and match accordingly
@@ -25,12 +26,19 @@ elsif ( $cmd ~~ /^(remove|rm)$/ ) {
 }
 elsif ( $cmd ~~ /^l(ist)?$/ ) {
     list_users();
+    exit;
+}
+elsif ( $cmd ~~ /^who$/ ) {
+    print "~$current_user\n";
+    exit;
 }
 else {
     usage() if $#ARGV > -1;
 
     switch_user($cmd);    # if theres one arg, we assume its $user
 }
+
+save_config();
 
 sub add_user {
     my ( $user, $key ) = @_;
@@ -61,6 +69,8 @@ sub list_users {
 
 sub switch_user {
     my $name = shift;
+
+    $cfg{current} = $name;
 
     print "~$name\n";
 }
@@ -130,6 +140,9 @@ gh - manage multiple github accts
      bsdf2
 
   > gh bsdf2
+    ~bsdf2
+
+  > gh who
     ~bsdf2
 
   > gh list
