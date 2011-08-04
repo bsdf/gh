@@ -7,6 +7,7 @@ use warnings;
 use File::Copy;
 use File::Path;
 use Data::Dumper;
+use Term::ANSIColor;
 
 usage() if $#ARGV == -1;
 
@@ -14,12 +15,24 @@ our %cfg;
 our @users;
 our $current_user;
 
+sub pr {
+    print colored ['green'], '~';
+    print shift, "\n";
+}
+
+sub err {
+    print colored ['red'], '~err: ';
+    print shift, "\n";
+}
+
 load_config();
 
 # check first arg and match accordingly
 my $cmd = shift @ARGV;
 
 if ( $cmd ~~ /^add$/ ) {
+    usage() if $#ARGV < 1;
+
     add_user(@ARGV);
 }
 elsif ( $cmd ~~ /^(remove|rm)$/ ) {
@@ -30,7 +43,7 @@ elsif ( $cmd ~~ /^l(ist)?$/ ) {
     exit;
 }
 elsif ( $cmd ~~ /^who$/ ) {
-    print "~$current_user\n";
+    pr "$current_user" if $current_user;
     exit;
 }
 elsif ( $cmd ~~ /^restore$/ ) {
@@ -47,7 +60,7 @@ save_config();
 sub add_user {
     my ( $user, $key ) = @_;
     if ( not -e $key ) {
-        print "~err: $key dont exist.\n";
+        err "$key dont exist.";
         exit;
     }
 
@@ -59,7 +72,7 @@ sub add_user {
     $cfg{users}{$user} = $key;
     $cfg{current} = $user if scalar @users == 0;
 
-    print "~added $user\n";
+    pr "added $user";
 }
 
 sub remove_user {
@@ -67,14 +80,14 @@ sub remove_user {
 
     if ( r_u_sure() ) {
         delete $cfg{users}{$user};
-        print "~bye\n";
+        pr "bye";
     }
 }
 
 sub list_users {
     for (@users) {
         if ( $_ eq $current_user ) {
-            print "~$_\n";
+            pr "$_";
         }
         else {
             print " $_\n";
@@ -85,7 +98,7 @@ sub list_users {
 sub switch_user {
     my $name = shift;
     if ( not $name ~~ @users ) {
-        print "~err: $name dont exist.\n";
+        err "$name dont exist.\n";
         exit;
     }
 
@@ -98,11 +111,12 @@ sub switch_user {
     system qw(killall ssh-agent);
 
     $cfg{current} = $name;
-    print "~$name\n";
+    pr "~$name";
 }
 
 sub r_u_sure {
-    print "~r u sure?: ";
+    print colored ['green'], "~";
+    print "r u sure?: ";
     chomp( my $input = <STDIN> );
 
     return $input ~~ /^y(es)?$/;
@@ -148,8 +162,9 @@ sub restore_files {
 }
 
 sub usage {
-    print STDERR <<EOF;
-~err: ur doin it rong.
+    print colored ['red'], '~';
+    print <<EOF;
+ur doin it rong.
 EOF
 
     exit;
