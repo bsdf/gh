@@ -7,6 +7,11 @@ use warnings;
 
 usage() if $#ARGV == -1;
 
+# some mock data for now.
+our @users        = qw(asdf bsdf csdf dsdf esdf);
+our $current_user = $users[ rand(@users) ];
+
+# check first arg and match accordingly
 my $cmd = shift @ARGV;
 
 if ( $cmd ~~ /^add$/ ) {
@@ -41,13 +46,8 @@ sub remove_user {
 }
 
 sub list_users {
-
-    # some mock data for now.
-    my @users    = qw(asdf bsdf csdf dsdf esdf);
-    my $selected = $users[ rand(@users) ];
-
     for (@users) {
-        if ( $_ eq $selected ) {
+        if ( $_ eq $current_user ) {
             print "~$_\n";
         }
         else {
