@@ -1,0 +1,48 @@
+#!/usr/bin/env perl
+# -*- mode: cperl -*-
+
+use strict;
+use autodie;
+use warnings;
+use File::Copy qw(copy);
+
+print "hi\n"
+
+__END__
+
+=head1 NAME
+
+gh - manage multiple github accts
+
+=head1 USEAGE
+
+  > gh add bsdf ~/.ssh/id_rsa
+    ~added bsdf
+
+  > gh add bsdf2 ~/.ssh/id_rsa2
+    ~added bsdf2
+
+  > gh add bsdf3 ffff.txt
+    ~err: key doesnt exist.
+
+  > gh list
+    ~bsdf
+     bsdf2
+
+  > gh bsdf2
+    ~bsdf2
+
+  > gh list
+     bsdf
+    ~bsdf2
+
+  > gh bsdf3
+    ~err: bsdf3 doesnt exist.
+
+  > gh remove bsdf2
+       or
+  > gh rm bsdf2
+    ~r u sure? y
+    ~bye
+
+=cut
