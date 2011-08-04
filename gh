@@ -5,11 +5,20 @@ use strict;
 use autodie;
 use warnings;
 
+our %CONFIG = (
+    'current' => 'bsdf',
+    'users'   => {
+        'asdf' => 'id_rsa',
+        'bsdf' => 'id_rsa2',
+        'csdf' => 'id_rsa3',
+    },
+);
+
 usage() if $#ARGV == -1;
 
 # some mock data for now.
-our @users        = qw(asdf bsdf csdf dsdf esdf);
-our $current_user = $users[ rand(@users) ];
+our @users        = sort keys $CONFIG{users};
+our $current_user = $CONFIG{current};
 
 # check first arg and match accordingly
 my $cmd = shift @ARGV;
