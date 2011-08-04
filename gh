@@ -6,7 +6,27 @@ use autodie;
 use warnings;
 use File::Copy qw(copy);
 
-print "hi\n"
+sub swap_files {
+    my ($a, $b) = @_;
+
+    my $ssh_dir = $ENV{'HOME'} . '/.ssh';
+    my $key1    = "$ssh_dir/$a";
+    my $key2    = "$ssh_dir/$b";
+
+    copy $key1, "$key1.b";
+    copy $key2, $key1;
+    copy "$key1.b", $key2;
+
+    unlink "$key1.b";
+}
+
+my @keys = qw(a b);
+
+#swap_files(@keys);
+
+print @ARGV;
+
+
 
 __END__
 
