@@ -2,14 +2,11 @@ NAME
     gh - manage multiple github accts
 
 USEAGE
-      > gh add bsdf ~/.ssh/id_rsa
+      > gh add bsdf --name "BEN ENGLISCH" --email "EMAILBEN145@gmail.com" --key ~/.ssh/id_rsa
         ~added bsdf
 
-      > gh add bsdf2 ~/.ssh/id_rsa2
+      > gh add bsdf2 -n "JEN ENGLISCH" -e "EMAILJEN145@gmail.com" -k ~/.ssh/id_rsa2
         ~added bsdf2
-
-      > gh add bsdf3 ffff.txt
-        ~err: key doesnt exist.
 
       > gh list
         ~bsdf
@@ -33,4 +30,8 @@ USEAGE
       > gh rm bsdf2
         ~r u sure? y
         ~bye
+
+      > gh restore
+        ~restored ~/.ssh/id_rsa
+        ~restored ~/.ssh/id_rsa2
 

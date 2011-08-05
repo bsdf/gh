@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
 # -*- mode: cperl -*-
+package gh;
 
 use strict;
 use autodie;
@@ -7,6 +8,7 @@ use warnings;
 use File::Copy;
 use File::Path;
 use Data::Dumper;
+use Getopt::Long;
 use File::Compare;
 use Term::ANSIColor;
 
@@ -32,9 +34,19 @@ load_config();
 my $cmd = shift @ARGV;
 
 if ( $cmd ~~ /^add$/ ) {
-    usage() if $#ARGV < 1;
+    my $name;
+    my $email;
+    my $key;
 
-    add_user(@ARGV);
+    my $result = GetOptions( "n|name=s"  => \$name,
+                             "e|email=s" => \$email,
+                             "k|key=s"   => \$key );
+
+    usage() if $#ARGV < 0;
+
+    my $username = shift @ARGV;
+
+    add_user($username, $name, $email, $key);
 }
 elsif ( $cmd ~~ /^(remove|rm)$/ ) {
     remove_user(@ARGV);
@@ -59,7 +71,10 @@ else {
 save_config();
 
 sub add_user {
-    my ( $user, $key ) = @_;
+    my ( $user, $name, $email, $key ) = @_;
+
+    usage() if not $name or not $email or not $key;
+
     if ( not -e $key ) {
         err "$key dont exist.";
         exit;
@@ -70,7 +85,12 @@ sub add_user {
     mkpath $backup_dir unless -d $backup_dir;
     copy $key, "$backup_dir/$user";
 
-    $cfg{users}{$user} = $key;
+    $cfg{users}{$user} = {
+        name  => "$name",
+        email => "$email",
+        key   => "$key",
+    };
+
     $cfg{current} = $user if scalar @users == 0;
 
     pr "added $user";
@@ -103,6 +123,9 @@ sub switch_user {
         exit;
     }
 
+    # update gitconfig settings
+    update_gitconfig($name);
+
     # cp selected user's key to ~/.ssh/id_rsa
     # this might be a really bad idea but whatev
     my $key = get_key($name);
@@ -121,6 +144,16 @@ sub r_u_sure {
     chomp( my $input = <STDIN> );
 
     return $input ~~ /^y(es)?$/;
+}
+
+sub update_gitconfig {
+    my $user  = shift;
+    my $name  = $cfg{users}{$user}{name};
+    my $email = $cfg{users}{$user}{email};
+
+    # TODO: edit actual config instead of system calls
+    system "git config --global user.name \"$name\"";
+    system "git config --global user.email \"$email\"";
 }
 
 sub get_key {
@@ -163,14 +196,13 @@ sub restore_files {
 
     my $backup_dir = "$ENV{HOME}/.gh/b";
 
-    for my $key ( keys $cfg{users} ) {
-        my $backup   = "$backup_dir/$key";
-        my $filename = $cfg{users}{$key};
-        my $original = "$ENV{HOME}/.ssh/$filename";
+    for my $user ( keys $cfg{users} ) {
+        my $backup   = "$backup_dir/$user";
+        my $filename = $cfg{users}{$user}{key};
 
-        if ( not compare($backup, $original) == 0 ) {
-            copy($backup, $original);
-            pr "restored ~/.ssh/$filename";
+        if ( not compare($backup, $filename) == 0 ) {
+            copy($backup, $filename);
+            pr "restored $filename";
         }
     }
 }
@@ -192,14 +224,11 @@ gh - manage multiple github accts
 
 =head1 USEAGE
 
-  > gh add bsdf ~/.ssh/id_rsa
+  > gh add bsdf --name "BEN ENGLISCH" --email "EMAILBEN145@gmail.com" --key ~/.ssh/id_rsa
     ~added bsdf
 
-  > gh add bsdf2 ~/.ssh/id_rsa2
+  > gh add bsdf2 -n "JEN ENGLISCH" -e "EMAILJEN145@gmail.com" -k ~/.ssh/id_rsa2
     ~added bsdf2
-
-  > gh add bsdf3 ffff.txt
-    ~err: key doesnt exist.
 
   > gh list
     ~bsdf
@@ -225,6 +254,7 @@ gh - manage multiple github accts
     ~bye
 
   > gh restore
-    ~keys restored
+    ~restored ~/.ssh/id_rsa
+    ~restored ~/.ssh/id_rsa2
 
 =cut
