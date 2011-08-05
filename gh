@@ -96,7 +96,8 @@ sub add_user {
         key   => "$key",
     };
 
-    switch_user($user) if scalar @users == 0;
+    # switch_user($user) if scalar @users == 0;
+    $cfg{current} = $user if scalar @users == 0;
 
     pr "added $user";
 }
