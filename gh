@@ -7,6 +7,7 @@ use warnings;
 use File::Copy;
 use File::Path;
 use Data::Dumper;
+use File::Compare;
 use Term::ANSIColor;
 
 usage() if $#ARGV == -1;
@@ -158,7 +159,20 @@ sub save_config {
 }
 
 sub restore_files {
+    return if not r_u_sure();
+
     my $backup_dir = "$ENV{HOME}/.gh/b";
+
+    for my $key ( keys $cfg{users} ) {
+        my $backup   = "$backup_dir/$key";
+        my $filename = $cfg{users}{$key};
+        my $original = "$ENV{HOME}/.ssh/$filename";
+
+        if ( not compare($backup, $original) == 0 ) {
+            copy($backup, $original);
+            pr "restored ~/.ssh/$filename";
+        }
+    }
 }
 
 sub usage {
