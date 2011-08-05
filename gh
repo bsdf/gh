@@ -233,6 +233,7 @@ gh - manage multiple github accts
     ~added bsdf2
 
   > gh list
+  > gh l
     ~bsdf
      bsdf2
 
@@ -250,7 +251,6 @@ gh - manage multiple github accts
     ~err: bsdf3 doesnt exist.
 
   > gh remove bsdf2
-       or
   > gh rm bsdf2
     ~r u sure? y
     ~bye

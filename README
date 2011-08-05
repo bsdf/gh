@@ -9,6 +9,7 @@ USEAGE
         ~added bsdf2
 
       > gh list
+      > gh l
         ~bsdf
          bsdf2
 
@@ -26,7 +27,6 @@ USEAGE
         ~err: bsdf3 doesnt exist.
 
       > gh remove bsdf2
-           or
       > gh rm bsdf2
         ~r u sure? y
         ~bye
