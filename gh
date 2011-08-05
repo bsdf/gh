@@ -108,10 +108,10 @@ sub switch_user {
     copy $key, "$ENV{HOME}/.ssh/id_rsa";
 
     # try and kill ssh-agent;
-    system qw(killall ssh-agent);
+    system "killall ssh-agent &> /dev/null";
 
     $cfg{current} = $name;
-    pr "~$name";
+    pr "$name";
 }
 
 sub r_u_sure {
