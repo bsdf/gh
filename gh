@@ -38,15 +38,17 @@ if ( $cmd ~~ /^add$/ ) {
     my $email;
     my $key;
 
-    my $result = GetOptions( "n|name=s"  => \$name,
-                             "e|email=s" => \$email,
-                             "k|key=s"   => \$key );
+    my $result = GetOptions(
+        "n|name=s"  => \$name,
+        "e|email=s" => \$email,
+        "k|key=s"   => \$key
+    );
 
     usage() if $#ARGV < 0;
 
     my $username = shift @ARGV;
 
-    add_user($username, $name, $email, $key);
+    add_user( $username, $name, $email, $key );
 }
 elsif ( $cmd ~~ /^(remove|rm)$/ ) {
     remove_user(@ARGV);
@@ -76,7 +78,7 @@ sub add_user {
     usage() if not $name or not $email or not $key;
 
     if ( not -e $key ) {
-        err "$key dont exist.";
+          err "$key dont exist.";
         exit;
     }
 
@@ -119,7 +121,7 @@ sub list_users {
 sub switch_user {
     my $name = shift;
     if ( not $name ~~ @users ) {
-        err "$name dont exist.\n";
+          err "$name dont exist.\n";
         exit;
     }
 
@@ -157,7 +159,7 @@ sub update_gitconfig {
 }
 
 sub get_key {
-    my $user = shift;
+    my $user       = shift;
     my $backup_dir = "$ENV{HOME}/.gh/b";
 
     return "$backup_dir/$user";
@@ -200,8 +202,8 @@ sub restore_files {
         my $backup   = "$backup_dir/$user";
         my $filename = $cfg{users}{$user}{key};
 
-        if ( not compare($backup, $filename) == 0 ) {
-            copy($backup, $filename);
+        if ( not compare( $backup, $filename ) == 0 ) {
+            copy( $backup, $filename );
             pr "restored $filename";
         }
     }
