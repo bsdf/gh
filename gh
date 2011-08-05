@@ -12,8 +12,6 @@ use Getopt::Long;
 use File::Compare;
 use Term::ANSIColor;
 
-usage() if $#ARGV == -1;
-
 our %cfg;
 our @users;
 our $current_user;
@@ -29,6 +27,11 @@ sub err {
 }
 
 load_config();
+
+if ( $#ARGV == -1) {
+    list_users();
+    exit;
+}
 
 # check first arg and match accordingly
 my $cmd = shift @ARGV;
@@ -234,6 +237,7 @@ gh - manage multiple github accts
 
   > gh list
   > gh l
+  > gh
     ~bsdf
      bsdf2
 
