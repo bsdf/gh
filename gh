@@ -2,6 +2,7 @@
 # -*- mode: cperl -*-
 package gh;
 
+use 5.10.0;
 use strict;
 use autodie;
 use warnings;
