@@ -6,6 +6,7 @@ use 5.10.0;
 use strict;
 use autodie;
 use warnings;
+use Tie::File;
 use File::Copy;
 use File::Path;
 use Data::Dumper;
@@ -27,6 +28,14 @@ sub err {
     print shift, "\n";
 }
 
+sub inn {
+    print colored ['green'], "~";
+    print shift, " ";
+    chomp( my $input = <STDIN> );
+
+    return $input;
+}
+
 load_config();
 
 if ( $#ARGV == -1) {
@@ -37,7 +46,29 @@ if ( $#ARGV == -1) {
 # check first arg and match accordingly
 my $cmd = shift @ARGV;
 
-if ( $cmd ~~ /^add$/ ) {
+if ( $cmd ~~ /^install$/ ) {
+    if ( not %cfg ) {
+        # first time run
+        my $name;
+        my $email;
+        my $key;
+
+        my $result = GetOptions(
+            "n|name=s"  => \$name,
+            "e|email=s" => \$email,
+            "k|key=s"   => \$key
+        );
+
+        my $username = shift;
+
+        add_first_user( $username, $name, $email, $key );
+        # copy ssh key
+        # chmod 600 key
+        # add ssh key
+        update_sshconfig();
+    }
+}
+elsif ( $cmd ~~ /^add$/ ) {
     my $name;
     my $email;
     my $key;
@@ -75,6 +106,43 @@ else {
 }
 
 save_config();
+
+sub add_user_interactive {
+    my $username = inn "github name:";
+    my $name     = inn "real name:";
+    my $email    = inn "email:";
+
+}
+
+sub update_sshconfig {
+    return if ssh_config_installed();
+
+    my $str = <<END;
+Host github.com
+  HostName github.com
+  User git
+  IdentityFile $ENV{HOME}/.ssh/id_rsa.gh
+
+END
+    
+    my @lines;
+    my $ssh_config = "$ENV{HOME}/.ssh/config";    
+
+    tie @lines, 'Tie::File', $ssh_config;
+    unshift @lines, $str;
+    untie @lines;
+}
+
+sub ssh_config_installed {
+    local $/;
+    my $contents;
+    open my $file, '<', "$ENV{HOME}/.ssh/config";
+
+    $contents = <$file>;
+    close $file;
+
+    return grep /id_rsa\.gh/, $contents;
+}
 
 sub add_user {
     my ( $user, $name, $email, $key ) = @_;
@@ -133,10 +201,9 @@ sub switch_user {
     # update gitconfig settings
     update_gitconfig($name);
 
-    # cp selected user's key to ~/.ssh/id_rsa
-    # this might be a really bad idea but whatev
+    # cp selected user's key to ~/.ssh/id_rsa.gh
     my $key = get_key($name);
-    copy $key, "$ENV{HOME}/.ssh/id_rsa";
+    copy $key, "$ENV{HOME}/.ssh/id_rsa.gh";
 
     # try and kill ssh-agent;
     system "killall ssh-agent &> /dev/null";
@@ -146,10 +213,7 @@ sub switch_user {
 }
 
 sub r_u_sure {
-    print colored ['green'], "~";
-    print "r u sure?: ";
-    chomp( my $input = <STDIN> );
-
+    my $input = inn "r u sure?:";
     return $input ~~ /^y(es)?$/;
 }
 
@@ -181,7 +245,7 @@ sub load_config {
     my $str = <$file>;
     eval $str;
 
-    @users        = sort keys $cfg{users};
+    @users        = sort keys $cfg{users} if $cfg{users};
     $current_user = $cfg{current};
 }
 
